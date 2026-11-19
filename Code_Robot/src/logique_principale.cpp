@@ -15,7 +15,7 @@ void loop() {
   // put you main code here, to run repeatedly:sadasdasdasdasdad
 } 
 
-void cases() {
+void cases(int num_case) {
 switch (1) {
   case 1:
     // Code for case 1

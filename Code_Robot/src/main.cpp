@@ -32,8 +32,5 @@ bool test_function(int allo)
     return true;
   }
 }
-<<<<<<< HEAD
 
 //allo
-=======
->>>>>>> a74a57fd9e2a90a69eb0c3761cd5999a6fd94ebb

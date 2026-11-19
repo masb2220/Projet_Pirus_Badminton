@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+//Ceci est un test de push
+
 // put function declarations here:
 int myFunction(int, int);
 
@@ -20,6 +22,10 @@ int myFunction(int x, int y)
   return x + y;
 }
 
+
+void tktjaimonfun() {
+  "Test de modifs de nath";
+}
 bool test_function(int allo)
 {
   if (allo > 10)
@@ -27,5 +33,8 @@ bool test_function(int allo)
     return true;
   }
 }
+<<<<<<< HEAD
 
 //allo
+=======
+>>>>>>> a74a57fd9e2a90a69eb0c3761cd5999a6fd94ebb

@@ -11,10 +11,9 @@ void setup()
   int result = myFunction(2, 3);
 }
 
-void loop()
-{
-  // googoo gaga
-}
+void loop() {
+  // put you main code here, to run repeatedly:sadasdasdasdasdad
+} 
 
 // put function definitions here:
 int myFunction(int x, int y)

@@ -1,36 +1,23 @@
 #include <Arduino.h>
 
-//Ceci est un test de push
-
 // put function declarations here:
 int myFunction(int, int);
+int bonsoir(){
+  return 1;
+}
 
-void setup()
-{
+void setup() {
   // put your setup code here, to run once:
   int result = myFunction(2, 3);
+  //test
 }
 
 void loop() {
-  // put you main code here, to run repeatedly:sadasdasdasdasdad
-} 
+  // put your main code here, to run repeatedly:
+}
 
 // put function definitions here:
-int myFunction(int x, int y)
-{
+int myFunction(int x, int y) {
   return x + y;
 }
-
-
-void tktjaimonfun() {
-  "Test de modifs de nath";
-}
-bool test_function(int allo)
-{
-  if (allo > 10)
-  {
-    return true;
-  }
-}
-
-//allo
+//bonsoir

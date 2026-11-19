@@ -16,5 +16,14 @@ void loop() {
 } 
 
 void cases() {
-
+switch (1) {
+  case 1:
+    // Code for case 1
+    break;
+  case 2:
+    // Code for case 2
+    break;
+  default:
+    // Code for default case
+    break;
 }

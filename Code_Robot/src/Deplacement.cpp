@@ -7,34 +7,64 @@
 #include <math.h>
 
 // function declarations here:
-char* getColor(void);
+const char* getColor(void);
+void updateAngle(void);
+void setupMPU(void);
+void straightBot(void);
 
-//Setup for the TCS34725 color sensor
-Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
+//Declaration and global variables for the TCS34725 color sensor
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_24MS, TCS34725_GAIN_16X);
+const char* currentColor = "Other";
+unsigned long lastColorTime = 0;
+
+//Declaration and global variables for the MPU6050 accelerometer
+Adafruit_MPU6050 mpu;
+float angleX = 0;        // current angle in degrees
+float gyroXOffset = 0;   // measured at startup
+unsigned long lastTime;
+
+// Variables for the movement
+float vitesse = 0.40;
+
 
 void setup(void)
 {
-  Serial.begin(9600);
+    BoardInit(); 
+    Serial.begin(9600);
 
-  if (tcs.begin()) {
-    Serial.println("Found sensor");
-  } else {
-    Serial.println("No TCS34725 found ... check your connections");
-    while (1);
-  }
+    // Init the TCS34725 color sensor
+    if (tcs.begin()) {
+        Serial.println("Found TCS34725");
+    } else {
+        Serial.println("No TCS34725 found ... check your connections");
+        while (1);
+    }
 
-  
+    // Init the MPU6050 accelerometer
+    if (mpu.begin()) {
+        Serial.println("Found MPU6050");
+    }
+    else {
+        Serial.println("No MPU6050 found ... check your connections");
+        while (1);
+    }
+
+    setupMPU();
 }
 
 void loop()
 {
-  Serial.println(getColor());
+    updateAngle();
+    straightBot();
+    if (millis() - lastColorTime > 100) { // check color every 100ms
+        currentColor = getColor();
+        //Serial.print("Current Color: ");
+        //Serial.println(currentColor);
+        lastColorTime = millis();
+    }
 }
 
-char* getColor(void){
-    const char* black = "Black";
-    const char* blue = "Blue";
-    const char* othercolor = "Other";
+const char* getColor(void){
 
     uint16_t r, g, b, c, colorTemp, lux;
 
@@ -52,14 +82,60 @@ char* getColor(void){
     Serial.print("C: "); Serial.print(c, DEC); Serial.print(" ");  */
 
     if (r < 150 && g < 150 && b < 150) {
-        //Serial.println(black);
-        return black;
-    } else if (b > r && b > g) {
-        //Serial.println(blue);
-        return blue;
-    } else {
-        //Serial.println(othercolor);
-        return othercolor;
+        return "Black";
+    } 
+    else if (b > r && b > g) {
+        return "Blue";
+    } 
+    else {
+        return "Other";
     }
 }
 
+void setupMPU() {
+    //Set the range and bandwidth of the MPU6050
+    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+
+    // Calibration of the gyro (no moving type shi)
+    Serial.println("Calibrating gyro...");
+    float sum = 0;
+    for (int i = 0; i < 500; i++)
+    {
+        sensors_event_t a, g, temp;
+        mpu.getEvent(&a, &g, &temp);
+        sum += g.gyro.x;
+        delay(5);
+    }
+    gyroXOffset = sum / 500.0;
+
+    lastTime = micros();
+}
+
+void updateAngle() // run this as often as possible for accurate angle
+{
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+    unsigned long now = micros();
+    float dt = (now - lastTime) / 1000000.0;  // seconds
+    lastTime = now;
+
+    // convert rad/s to deg/s
+    float rate = (g.gyro.x - gyroXOffset) * 180.0 / PI;
+
+    if (abs(rate) < 0.3) rate = 0;  // ignore noise
+
+    angleX += rate * dt;
+    //Serial.print("Angle: ");
+    //Serial.println(angleX);
+}
+
+void straightBot() {
+    // Code to make the robot go straight
+    updateAngle();
+    float correction = angleX * 0.01; // Correction with Kp
+    MOTOR_SetSpeed(RIGHT,vitesse - correction);
+    MOTOR_SetSpeed(LEFT, vitesse + correction);
+    
+}

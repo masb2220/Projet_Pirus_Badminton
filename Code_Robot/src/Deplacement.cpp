@@ -11,6 +11,8 @@ const char* getColor(void);
 void updateAngle(void);
 void setupMPU(void);
 void straightBot(void);
+void turn(float degrees);
+void driveFor(unsigned long ms_time);
 
 //Declaration and global variables for the TCS34725 color sensor
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_24MS, TCS34725_GAIN_16X);
@@ -54,14 +56,11 @@ void setup(void)
 
 void loop()
 {
-    updateAngle();
-    straightBot();
-    if (millis() - lastColorTime > 100) { // check color every 100ms
-        currentColor = getColor();
-        //Serial.print("Current Color: ");
-        //Serial.println(currentColor);
-        lastColorTime = millis();
-    }
+    driveFor(1000); // Example: drive straight for 1 seconds
+    delay(300); 
+    turn(90); // Example: turn 90 degrees to the right
+    delay(300);
+    
 }
 
 const char* getColor(void){
@@ -138,4 +137,43 @@ void straightBot() {
     MOTOR_SetSpeed(RIGHT,vitesse - correction);
     MOTOR_SetSpeed(LEFT, vitesse + correction);
     
+}
+
+void turn(float degrees)
+{
+    angleX = 0;
+    float target = degrees;
+
+    while (abs(target - angleX) > 1.0)   // 1° tolerance
+    {
+        updateAngle();
+        if (angleX < target) {
+            MOTOR_SetSpeed(LEFT, -0.2);
+            MOTOR_SetSpeed(RIGHT, +0.2);
+        } else {
+            MOTOR_SetSpeed(LEFT, +0.2);
+            MOTOR_SetSpeed(RIGHT, -0.2);
+        }
+    }
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+}
+
+void driveFor(unsigned long ms_time)
+{
+    unsigned long start = millis();
+    angleX = 0; // Reset angle for straight driving
+    
+    while (millis() - start < ms_time)
+    {
+        straightBot();
+
+        if (millis() - lastColorTime > 100) { // check color every 100ms
+            currentColor = getColor();
+            lastColorTime = millis();
+        }
+    }
+
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
 }
